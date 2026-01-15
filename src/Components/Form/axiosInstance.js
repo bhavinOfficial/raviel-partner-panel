@@ -9,7 +9,7 @@ const axiosInstance = axios.create({
   },
 });
 
-// 🔐 Request Interceptor → only attach token
+// 🔐 Attach token
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = sessionStorage.getItem("token");
@@ -23,15 +23,13 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// 🚨 Response Interceptor → handle invalid token
+// 🚨 Handle 401 (NO redirect here)
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-if (error.response?.status === 401) {
-  sessionStorage.clear();
-  window.location.replace("/login");
-}
-
+    if (error.response?.status === 401) {
+      sessionStorage.removeItem("token");
+    }
     return Promise.reject(error);
   }
 );

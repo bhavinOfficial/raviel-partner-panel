@@ -51,9 +51,9 @@ const App = () => {
         <Route
           path="/onboarding"
           element={
-            <PublicRoute>
+            <ProtectedRoute>
               <OnBoarding />
-            </PublicRoute>
+            </ProtectedRoute>
           }
         />
         {/* Protected routes */}
@@ -83,7 +83,8 @@ const App = () => {
         </Route>
 
         {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+
 
       </Routes>
     </Router>

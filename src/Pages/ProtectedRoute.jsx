@@ -4,21 +4,24 @@ import { useUser } from "../../src/Components/context/UserProvider";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useUser();
   const location = useLocation();
-
   const token = sessionStorage.getItem("token");
 
-  // ⏳ Wait until user data loads
-  if (loading) return null; // or spinner
+  if (loading) return null;
 
-  // ❌ Not logged in
+  // 🔒 Not logged in
   if (!token) {
+    if (location.pathname === "/login") return children;
     return <Navigate to="/login" replace />;
   }
 
-  const isOnboardingCompleted =
-    user?.payload?.isOnboardingCompleted;
+  // ⛔ Token exists but user missing
+  if (!user?.payload) {
+    return <Navigate to="/login" replace />;
+  }
 
-  // 🔥 Force onboarding if not completed
+  const isOnboardingCompleted = user.payload.isOnboardingCompleted;
+
+  // 🔁 Force onboarding
   if (
     isOnboardingCompleted === false &&
     location.pathname !== "/onboarding"
@@ -26,7 +29,7 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // ✅ If onboarding completed, block onboarding page
+  // 🚫 Block onboarding after completion
   if (
     isOnboardingCompleted === true &&
     location.pathname === "/onboarding"

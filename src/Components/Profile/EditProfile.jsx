@@ -21,47 +21,53 @@ const EditProfile = () => {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
-    mobile: "",
+    phoneNumber: "",
     businessName: "",
     gstNumber: "",
     gstAddress: "",
   });
 
-  useEffect(() => {
-    if (profile) {
-      setForm({
-        firstName: profile.firstName || "",
-        lastName: profile.lastName || "",
-        mobile: profile.mobile || "",
-        businessName: business?.businessName || "",
-        gstNumber: business?.gstNumber || "",
-        gstAddress: business?.gstAddress || "",
-      });
-    }
-  }, [profile]);
+useEffect(() => {
+  if (profile) {
+    setForm({ 
+      firstName: profile.firstName || "",
+      lastName: profile.lastName || "",
+      phoneNumber: profile.phoneNumber || "",
+
+      // ❌ BUSINESS DETAILS COMMENT
+      businessName: business?.businessName || "",
+      gstNumber: business?.gstNumber || "",
+      gstAddress: business?.gstAddress || "",
+    });
+  }
+}, [profile]);
+
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async () => {
-    try {
-      const res = await axiosInstance.put("/user", {
-        firstName: form.firstName,
-        lastName: form.lastName,
-        mobile: form.mobile,
-        userBusinessDetails: {
-          businessName: form.businessName,
-          gstNumber: form.gstNumber,
-          gstAddress: form.gstAddress,
-        },
-      });
+const handleSubmit = async () => {
+  try {
+    const res = await axiosInstance.put("/user", {
+      firstName: form.firstName,
+      lastName: form.lastName,
+      phoneNumber: form.phoneNumber,
 
-      setUser(res.data);
-      navigate("/profile");
-    } catch (err) {
-      console.error("❌ Update failed", err);
-    }
-  };
+      // ❌ BUSINESS DETAILS COMMENT
+      // userBusinessDetails: {
+        businessName: form.businessName,
+        gstNumber: form.gstNumber,
+        gstAddress: form.gstAddress,
+      // },
+    });
+
+    setUser(res.data);
+    navigate("/profile");
+  } catch (err) {
+    console.error("❌ Update failed", err);
+  }
+};
+
 
   return (
     <Box
@@ -125,9 +131,9 @@ const EditProfile = () => {
         </Box>
 
         <TextField
-          label="Mobile Number"
-          name="mobile"
-          value={form.mobile}
+          label="phoneNumber Number"
+          name="phoneNumber"
+          value={form.phoneNumber}
           onChange={handleChange}
           fullWidth
           sx={{ mt: 2 }}

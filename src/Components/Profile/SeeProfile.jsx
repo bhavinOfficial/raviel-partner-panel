@@ -133,7 +133,7 @@ const SeeProfile = () => {
           </Typography>
 
           <InfoRow label="Email" value={profile?.email} />
-          <InfoRow label="Phone" value={profile?.mobile} />
+          <InfoRow label="Phone" value={profile?.phoneNumber} />
           <InfoRow
             label="Created At"
             value={
