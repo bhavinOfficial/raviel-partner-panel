@@ -1,60 +1,160 @@
-import { Box, Typography, Paper } from "@mui/material"
-import React, { useEffect, useState } from "react"
-import { getUserProfile } from "./userApi"
+import {
+  Avatar,
+  Box,
+  Typography,
+  Button,
+  Divider,
+} from "@mui/material";
+import React from "react";
+import { useUser } from "../context/UserProvider";
 
-const Profile = () => {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+const SeeProfile = () => {
+  /* 🔹 USER FROM CONTEXT */
+  const { user, loading } = useUser();
+console.log(user);
 
-  useEffect(() => {
-    getUserProfile()
-      .then((data) => {
-        console.log("📦 PROFILE DATA:", data)
-        setUser(data.user)
-      })
-      .catch((err) => {
-        console.log("🚫 Unauthorized or token expired", err)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-  }, [])
+  if (loading) return <Typography>Loading...</Typography>;
+  if (!user) return <Typography>No user data</Typography>;
 
-  if (loading)
-    return <Typography>Loading...</Typography>
-
-  if (!user)
-    return <Typography>No user data</Typography>
+  const profile = user.payload;
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        maxWidth: 400,
-        mx: "auto",
-        mt: 4,
-        p: 3,
-        borderRadius: 3,
-        background: "#F4F6FF"
-      }}
-    >
-      <Typography variant="h6" mb={2}>
-        Profile
-      </Typography>
+    <Box sx={{ width: "100%", minHeight: "100vh", p: 4 }}>
+      {/* Header */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 4,
+          px: 1,
+        }}
+      >
+        <Typography fontSize={24} fontWeight={600} color="#071B2F">
+          My Profile
+        </Typography>
 
-      <Typography>
-        <b>Name:</b> {user.name}
-      </Typography>
+        <Button
+          variant="contained"
+          sx={{
+            bgcolor: "#635BFF",
+            textTransform: "none",
+            borderRadius: 2,
+            px: 3,
+            "&:hover": { bgcolor: "#5148e5" },
+          }}
+        >
+          Edit Profile
+        </Button>
+      </Box>
 
-      <Typography>
-        <b>Email:</b> {user.email}
-      </Typography>
+      {/* Main Content */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "320px 1fr" },
+          gap: 4,
+        }}
+      >
+        {/* Left Profile Panel */}
+        <Box
+          sx={{
+            bgcolor: "#ffffff",
+            borderRadius: 4,
+            p: 4,
+            textAlign: "center",
+            boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
+          }}
+        >
+          <Avatar
+            sx={{
+              width: 120,
+              height: 120,
+              mx: "auto",
+              mb: 2,
+              bgcolor: "#635BFF",
+              fontSize: 48,
+              fontWeight: 600,
+            }}
+          >
+            {profile?.firstName?.[0]?.toUpperCase() || "U"}
+          </Avatar>
 
-      <Typography>
-        <b>Phone:</b> {user.phone}
-      </Typography>
-    </Paper>
-  )
-}
+          <Typography fontSize={20} fontWeight={600}>
+            {profile?.firstName} {profile?.lastName}
+          </Typography>
 
-export default Profile
+          <Typography color="text.secondary" fontSize={14}>
+            {profile?.role?.toUpperCase()}
+          </Typography>
+
+          <Divider sx={{ my: 3 }} />
+
+          <Typography fontSize={14} color="text.secondary">
+            Account Status
+          </Typography>
+
+          <Typography
+            fontWeight={600}
+            color={
+              profile?.isOnboardingCompleted ? "#36C76C" : "#F8C20A"
+            }
+          >
+            {profile?.isOnboardingCompleted
+              ? "Onboarding Completed"
+              : "Onboarding Pending"}
+          </Typography>
+        </Box>
+
+        {/* Right Details Panel */}
+        <Box
+          sx={{
+            bgcolor: "#ffffff",
+            borderRadius: 4,
+            p: 4,
+            boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
+          }}
+        >
+          <Typography fontSize={18} fontWeight={600} mb={3}>
+            Personal Information
+          </Typography>
+
+          <InfoRow label="Email" value={profile?.email} />
+          <InfoRow label="Phone" value={profile?.mobile} />
+          <InfoRow
+            label="Created At"
+            value={
+              profile?.createdAt
+                ? new Date(profile.createdAt).toLocaleString()
+                : "-"
+            }
+          />
+          <InfoRow
+            label="Last Login"
+            value={
+              profile?.lastLoginDate
+                ? new Date(profile.lastLoginDate).toLocaleString()
+                : "-"
+            }
+          />
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+const InfoRow = ({ label, value }) => (
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "space-between",
+      py: 1.5,
+      borderBottom: "1px solid #eee",
+    }}
+  >
+    <Typography color="text.secondary">{label}</Typography>
+    <Typography fontWeight={500}>{value || "-"}</Typography>
+  </Box>
+);
+
+export default SeeProfile;

@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
@@ -7,30 +7,33 @@ const axiosInstance = axios.create({
     "Content-Type": "application/json",
     "ngrok-skip-browser-warning": "true",
   },
-})
+});
 
-// 🔐 Request Interceptor → Token attach  
+// 🔐 Request Interceptor → only attach token
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = sessionStorage.getItem("token")
+    const token = sessionStorage.getItem("token");
+
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return config
+
+    return config;
   },
   (error) => Promise.reject(error)
-)
+);
 
-// ❌ Response Interceptor → Handle Unauthorized
+// 🚨 Response Interceptor → handle invalid token
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      sessionStorage.clear()
-      window.location.href = "/login"
-    }
-    return Promise.reject(error)
-  }
-)
+if (error.response?.status === 401) {
+  sessionStorage.clear();
+  window.location.replace("/login");
+}
 
-export default axiosInstance
+    return Promise.reject(error);
+  }
+);
+
+export default axiosInstance;

@@ -14,7 +14,7 @@ import {
 
 import HomeIcon from "@mui/icons-material/Home";
 import MenuIcon from "@mui/icons-material/Menu";
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import WidgetsIcon from "@mui/icons-material/Widgets";
 import DesktopMacIcon from "@mui/icons-material/DesktopMac";
@@ -25,6 +25,7 @@ import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 
 import logopngonly from "../../assets/logos/whitebglogoonly.png";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useUser } from "../context/UserProvider";
 
 /* --- Menu data --- */
 const menuItems = [
@@ -39,18 +40,23 @@ const menuItems = [
 ];
 
 const Sidebar = () => {
+  /* 🔹 USER FROM CONTEXT (NO API CALL HERE) */
+  const { user, loading } = useUser();
+  const profile = user?.payload;
+
   const navigate = useNavigate();
-  const location = useLocation(); // ✅ NEW
+  const location = useLocation();
+
   const [open, setOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const isMobile = useMediaQuery("(max-width:767px)");
 
+  const isMobile = useMediaQuery("(max-width:767px)");
   const drawerWidth = open ? 256 : 105;
 
+  /* --- Menu Item Renderer --- */
   const renderMenuItem = (item, isExpanded) => {
     const Icon = item.icon;
 
-    // ✅ ACTIVE LOGIC BASED ON URL
     const isActive =
       item.path === "/"
         ? location.pathname === "/"
@@ -62,41 +68,23 @@ const Sidebar = () => {
         to={item.path}
         selected={isActive}
         sx={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-start",
           px: 2,
           py: 1.5,
           mb: 0.5,
           borderRadius: 2,
           minHeight: 48,
-
           background: isActive
             ? "linear-gradient(90deg, #635BFF 0%, #8B85FF 100%)"
             : "transparent",
-
-          color: isActive ? "#ffffff" : "#6b7280",
-
-          boxShadow: isActive ? "0 6px 16px rgba(99,91,255,0.35)" : "none",
-
+          color: isActive ? "#fff" : "#6b7280",
           transition: "all 0.25s ease",
-
           "&:hover": {
             backgroundColor: isActive ? "#635BFF" : "#F3F4F6",
             color: isActive ? "#fff" : "#071B2F",
           },
         }}
       >
-        <Icon
-          sx={{
-            minWidth: 40,
-            width: 24,
-            height: 24,
-            fontSize: 24,
-            flexShrink: 0,
-          }}
-        />
+        <Icon sx={{ minWidth: 40, fontSize: 24 }} />
         <ListItemText
           primary={item.name}
           sx={{
@@ -104,12 +92,8 @@ const Sidebar = () => {
             opacity: isExpanded ? 1 : 0,
             width: isExpanded ? "auto" : 0,
             overflow: "hidden",
-            transition: "opacity 0.3s ease, width 0.3s ease",
             whiteSpace: "nowrap",
-          }}
-          primaryTypographyProps={{
-            fontWeight: isActive ? 600 : 500,
-            fontSize: "0.95rem",
+            transition: "0.3s",
           }}
         />
       </ListItemButton>
@@ -126,8 +110,16 @@ const Sidebar = () => {
     return <Box key={item.name}>{button}</Box>;
   };
 
+  /* --- Sidebar Content --- */
   const sidebarContent = (isExpanded) => (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <Box
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
       {/* Logo */}
       <Box
         sx={{
@@ -138,20 +130,15 @@ const Sidebar = () => {
           borderBottom: "1px solid #e5e7eb",
         }}
       >
-        <Box
-          component="img"
-          src={logopngonly}
-          sx={{ width: 60, height: 60 }}
-        />
+        <Box component="img" src={logopngonly} sx={{ width: 60 }} />
         <Typography
           variant="h6"
           sx={{
             fontWeight: 700,
             opacity: isExpanded ? 1 : 0,
-            width: isExpanded ? "auto" : 0,
             overflow: "hidden",
-            transition: "0.3s",
             whiteSpace: "nowrap",
+            transition: "0.3s",
           }}
         >
           RAVIEL
@@ -159,7 +146,7 @@ const Sidebar = () => {
       </Box>
 
       {/* Menu */}
-      <List sx={{ flex: 1, px: 2, py: 2 }}>
+      <List sx={{ flex: 1, px: 2, overflow: "hidden" }}>
         {menuItems.map((item) => renderMenuItem(item, isExpanded))}
       </List>
 
@@ -167,7 +154,7 @@ const Sidebar = () => {
       <Box
         onClick={() => navigate("/profile")}
         sx={{
-          p: 2,
+          p: 3,
           borderTop: "1px solid #e5e7eb",
           display: "flex",
           alignItems: "center",
@@ -175,28 +162,27 @@ const Sidebar = () => {
           cursor: "pointer",
         }}
       >
-        <Avatar>JD</Avatar>
-        <Box
-          sx={{
-            opacity: isExpanded ? 1 : 0,
-            width: isExpanded ? "auto" : 0,
-            overflow: "hidden",
-            transition: "0.3s",
-            whiteSpace: "nowrap",
-          }}
-        >
-          <Typography fontWeight={600}>John Doe</Typography>
-          <Typography variant="caption" color="gray">
-            john@example.com
-          </Typography>
-        </Box>
+        <Avatar sx={{ bgcolor: "#635BFF" }}>
+          {profile?.firstName?.[0]?.toUpperCase() || "U"}
+        </Avatar>
+
+        {isExpanded && (
+          <Box>
+            <Typography fontWeight={600}>
+              {loading ? "Loading..." : profile?.firstName || "User"}
+            </Typography>
+            <Typography variant="caption" color="gray">
+              {profile?.email || ""}
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Box>
   );
 
   return (
     <>
-      {/* Mobile button */}
+      {/* Mobile Toggle */}
       {isMobile && (
         <IconButton
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -206,7 +192,7 @@ const Sidebar = () => {
         </IconButton>
       )}
 
-      {/* Desktop */}
+      {/* Desktop Drawer */}
       {!isMobile && (
         <Drawer
           variant="permanent"
@@ -217,6 +203,7 @@ const Sidebar = () => {
             "& .MuiDrawer-paper": {
               width: drawerWidth,
               transition: "width 0.3s ease",
+              overflow: "hidden",
             },
           }}
         >
@@ -224,11 +211,16 @@ const Sidebar = () => {
         </Drawer>
       )}
 
-      {/* Mobile drawer */}
+      {/* Mobile Drawer */}
       <Drawer
         variant="temporary"
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
+        sx={{
+          "& .MuiDrawer-paper": {
+            overflow: "hidden",
+          },
+        }}
       >
         {sidebarContent(true)}
       </Drawer>

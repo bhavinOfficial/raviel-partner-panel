@@ -23,6 +23,7 @@ import AccountBlocked from "./Components/IssueSummary/AccountBlocked";
 import CanceledbySeller from "./Components/IssueSummary/CanceledbySeller";
 import HighReturn from "./Components/IssueSummary/HighReturn";
 import AddNewSeller from "./Pages/AddNewSeller";
+import OnBoarding from "./Components/Form/OnBoarding";
 
 const App = () => {
   return (
@@ -46,7 +47,14 @@ const App = () => {
             </PublicRoute>
           }
         />
-
+        <Route
+          path="/onboarding"
+          element={
+            <ProtectedRoute>
+              <OnBoarding />
+            </ProtectedRoute>
+          }
+        />
         {/* Protected routes */}
         <Route
           path="/"

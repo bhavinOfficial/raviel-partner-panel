@@ -15,19 +15,20 @@ const AddSeller = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "#F4F6FF",
-        p: 4
+        p: 4,
+        width:"100%"
       }}
     >
       {/* ================= Card ================= */}
       <Paper
-        elevation={0}
+        elevation={0}                                                   
         sx={{
-          maxWidth: 900,
+          maxWidth: "100%",
           mx: "auto",
           p: 4,
           borderRadius: 4,
-          background: "#ffffff"
+          background: "#ffffff",
+          boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
         }}
       >
         <Typography

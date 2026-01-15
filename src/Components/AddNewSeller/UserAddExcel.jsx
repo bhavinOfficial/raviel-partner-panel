@@ -9,7 +9,7 @@ const UserAddExcel = () => {
         p: 4,
         borderRadius: 3,
         textAlign: "center",
-        background: "#DEFFEB"
+        // background: "#DEFFEB"
       }}
     >
       <Typography

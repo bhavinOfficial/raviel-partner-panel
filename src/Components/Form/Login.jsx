@@ -13,6 +13,7 @@ import { useNavigate, Link } from "react-router-dom";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import axiosInstance from "./axiosInstance";
+import { UserProvider } from "../context/UserProvider";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const Login = () => {
 
       const token = res.data.payload.accessToken;
       sessionStorage.setItem("token", token);
+      // UserProvider()
 
       navigate("/home");
     } catch (error) {

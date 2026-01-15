@@ -9,7 +9,7 @@ const Profile = () => {
         maxWidth={false}
         sx={{ maxWidth: "1400px", fontFamily: "Inter" }}
       >
-        <SeeProfile/>  
+        <SeeProfile />  
       </Container> 
     </>
   )
