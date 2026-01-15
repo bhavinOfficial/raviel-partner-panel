@@ -7,16 +7,20 @@ import {
 } from "@mui/material";
 import React from "react";
 import { useUser } from "../context/UserProvider";
+import { useNavigate } from "react-router-dom";
 
 const SeeProfile = () => {
+  const navigate = useNavigate();
   /* 🔹 USER FROM CONTEXT */
   const { user, loading } = useUser();
-console.log(user);
+  // console.log("hello", user);
 
   if (loading) return <Typography>Loading...</Typography>;
   if (!user) return <Typography>No user data</Typography>;
 
   const profile = user.payload;
+  const business = profile?.userBusinessDetails;
+
 
   return (
     <Box sx={{ width: "100%", minHeight: "100vh", p: 4 }}>
@@ -41,11 +45,12 @@ console.log(user);
             textTransform: "none",
             borderRadius: 2,
             px: 3,
-            "&:hover": { bgcolor: "#5148e5" },
           }}
+          onClick={() => navigate("/edit-profile")}
         >
           Edit Profile
         </Button>
+
       </Box>
 
       {/* Main Content */}
@@ -96,14 +101,22 @@ console.log(user);
 
           <Typography
             fontWeight={600}
-            color={
-              profile?.isOnboardingCompleted ? "#36C76C" : "#F8C20A"
-            }
+            sx={{
+              color: profile?.isOnboardingCompleted ? "#36C76C" : "#F8C20A",
+              cursor: profile?.isOnboardingCompleted ? "default" : "pointer",
+              textDecoration: profile?.isOnboardingCompleted ? "none" : "underline",
+            }}
+            onClick={() => {
+              if (!profile?.isOnboardingCompleted) {
+                navigate("/onboarding");
+              }
+            }}
           >
             {profile?.isOnboardingCompleted
               ? "Onboarding Completed"
-              : "Onboarding Pending"}
+              : "Complete Your Onboarding"}
           </Typography>
+
         </Box>
 
         {/* Right Details Panel */}
@@ -137,6 +150,21 @@ console.log(user);
                 : "-"
             }
           />
+          {/* Business Information */}
+          {business && (
+            <>
+              <Divider sx={{ my: 4 }} />
+
+              <Typography fontSize={18} fontWeight={600} mb={3}>
+                Business Information
+              </Typography>
+
+              <InfoRow label="Business Name" value={business?.businessName} />
+              <InfoRow label="GST Number" value={business?.gstNumber} />
+              <InfoRow label="GST Address" value={business?.gstAddress} />
+            </>
+          )}
+
         </Box>
       </Box>
     </Box>
