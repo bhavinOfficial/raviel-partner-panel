@@ -83,7 +83,7 @@ const ShipmentStatus = () => {
             borderRadius: "20px",
             p: 3,
             boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
-            height: "515px",
+            height: "460px",
             overflowY: "auto",
             overflowX: "hidden",
           }}
@@ -94,6 +94,7 @@ const ShipmentStatus = () => {
               onClick={() => setSelectedSubStatus(sub.label)}
               sx={{
                 width: "100%",
+                 boxSizing: "border-box", 
                 bgcolor: STATUS_CONFIG[selectedStatus].color,
                 borderRadius: "20px",
                 padding: "15px 25px",
