@@ -24,6 +24,7 @@ import CanceledbySeller from "./Components/IssueSummary/CanceledbySeller";
 import HighReturn from "./Components/IssueSummary/HighReturn";
 import AddNewSeller from "./Pages/AddNewSeller";
 import OnBoarding from "./Components/Form/OnBoarding";
+import EditProfile from "./Components/Profile/EditProfile";
 
 const App = () => {
   return (
@@ -50,9 +51,9 @@ const App = () => {
         <Route
           path="/onboarding"
           element={
-            <ProtectedRoute>
+            <PublicRoute>
               <OnBoarding />
-            </ProtectedRoute>
+            </PublicRoute>
           }
         />
         {/* Protected routes */}
@@ -73,6 +74,7 @@ const App = () => {
           <Route path="attendance" element={<Attendance />} />
           <Route path="seller_partner" element={<SellerPartner />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="edit-profile" element={<EditProfile />} />
 
           {/* Issue Summary */}
           <Route path="issue-summary/account-blocked" element={<AccountBlocked />} />
