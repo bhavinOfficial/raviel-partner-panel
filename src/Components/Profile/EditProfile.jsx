@@ -25,48 +25,54 @@ const EditProfile = () => {
     businessName: "",
     gstNumber: "",
     gstAddress: "",
+    managerPhoneNumber:"",
+    managerEmail:""
   });
 
-useEffect(() => {
-  if (profile) {
-    setForm({ 
-      firstName: profile.firstName || "",
-      lastName: profile.lastName || "",
-      phoneNumber: profile.phoneNumber || "",
+  useEffect(() => {
+    if (profile) {
+      setForm({
+        firstName: profile.firstName || "",
+        lastName: profile.lastName || "",
+        phoneNumber: profile.phoneNumber || "",
 
-      // ❌ BUSINESS DETAILS COMMENT
-      businessName: business?.businessName || "",
-      gstNumber: business?.gstNumber || "",
-      gstAddress: business?.gstAddress || "",
-    });
-  }
-}, [profile]);
+        // ❌ BUSINESS DETAILS COMMENT
+        businessName: business?.businessName || "",
+        gstNumber: business?.gstNumber || "",
+        gstAddress: business?.gstAddress || "",
+        managerPhoneNumber: business?.managerPhoneNumber || "",
+        managerEmail: business?.managerEmail || "",
+      });
+    }
+  }, [profile]);
 
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-const handleSubmit = async () => {
-  try {
-    const res = await axiosInstance.put("/user", {
-      firstName: form.firstName,
-      lastName: form.lastName,
-      phoneNumber: form.phoneNumber,
+  const handleSubmit = async () => {
+    try {
+      const res = await axiosInstance.put("/user", {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        phoneNumber: form.phoneNumber,
 
-      // ❌ BUSINESS DETAILS COMMENT
-      // userBusinessDetails: {
+        // ❌ BUSINESS DETAILS COMMENT
+        // userBusinessDetails: {
         businessName: form.businessName,
         gstNumber: form.gstNumber,
         gstAddress: form.gstAddress,
-      // },
-    });
+        managerPhoneNumber: form.managerPhoneNumber,
+        managerEmail: form.managerEmail
+        // },
+      });
 
-    setUser(res.data);
-    navigate("/profile");
-  } catch (err) {
-    console.error("❌ Update failed", err);
-  }
-};
+      setUser(res.data);
+      navigate("/profile");
+    } catch (err) {
+      console.error("❌ Update failed", err);
+    }
+  };
 
 
   return (
@@ -174,6 +180,23 @@ const handleSubmit = async () => {
             label="GST Address"
             name="gstAddress"
             value={form.gstAddress}
+            onChange={handleChange}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            label="Manager Phone Number (Optional)"
+            name="managerPhoneNumber"
+            value={form.managerPhoneNumber}
+            onChange={handleChange}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+
+          <TextField
+            label="Manager Email (Optional)"
+            name="managerEmail"
+            value={form.managerEmail}
             onChange={handleChange}
             fullWidth
           />

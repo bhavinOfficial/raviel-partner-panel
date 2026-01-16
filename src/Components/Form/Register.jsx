@@ -16,6 +16,8 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import logo from "../../assets/logos/LOGO.png"
 import registreimage from "../../assets/form/Untitled-2.png"
+import toast from "react-hot-toast";
+
 
 const Register = () => {
   const navigate = useNavigate();
@@ -31,7 +33,6 @@ const Register = () => {
   });
 
   const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -61,12 +62,18 @@ const Register = () => {
     if (!validate()) return;
 
     try {
-      await axiosInstance.post("/user/register", form);
-      setSuccess(true);
-      setTimeout(() => navigate("/login"), 2000);
-    } catch (err) {
-      alert("Registration Failed");
-    }
+await axiosInstance.post("/user/register", form);
+
+toast.success("🎉 Registered Successfully!");
+
+setTimeout(() => {
+  navigate("/login");
+}, 1500);
+
+    }catch (err) {
+  toast.error("❌ Registration failed. Please try again.");
+}
+
   };
 
   return (
@@ -269,18 +276,7 @@ const Register = () => {
       </Box>
 
       {/* ✅ SUCCESS SNACKBAR */}
-      <Snackbar open={success} autoHideDuration={2000}>
-        <Alert
-          severity="success"
-          variant="filled"
-          sx={{
-            background: "#36C76C",
-            fontSize: 15,
-          }}
-        >
-          🎉 Registered Successfully!
-        </Alert>
-      </Snackbar>
+
     </>
   );
 };

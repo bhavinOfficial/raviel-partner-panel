@@ -27,11 +27,15 @@ import OnBoarding from "./Components/Form/OnBoarding";
 import EditProfile from "./Components/Profile/EditProfile";
 import SellerDetail from "./Components/Seller_Desk/SellerDetail";
 
+import { Toaster } from "react-hot-toast";
+
 const App = () => {
   return (
     <Router>
-      <Routes>
+      {/* ✅ TOASTER MUST BE OUTSIDE ROUTES */}
+      <Toaster position="top-center" reverseOrder={false} />
 
+      <Routes>
         {/* Public routes */}
         <Route
           path="/login"
@@ -41,6 +45,7 @@ const App = () => {
             </PublicRoute>
           }
         />
+
         <Route
           path="/register"
           element={
@@ -49,6 +54,7 @@ const App = () => {
             </PublicRoute>
           }
         />
+
         <Route
           path="/onboarding"
           element={
@@ -57,7 +63,8 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        {/* Protected routes */}
+
+        {/* Protected layout routes */}
         <Route
           path="/"
           element={
@@ -77,20 +84,26 @@ const App = () => {
           <Route path="profile" element={<Profile />} />
           <Route path="edit-profile" element={<EditProfile />} />
 
-          {/* ✅ Seller Desk */}
+          {/* Seller Desk */}
           <Route path="seller_desk/:sellerId" element={<SellerDetail />} />
 
           {/* Issue Summary */}
-          <Route path="issue-summary/account-blocked" element={<AccountBlocked />} />
-          <Route path="issue-summary/canceled-by-seller" element={<CanceledbySeller />} />
-          <Route path="issue-summary/high-return" element={<HighReturn />} />
+          <Route
+            path="issue-summary/account-blocked"
+            element={<AccountBlocked />}
+          />
+          <Route
+            path="issue-summary/canceled-by-seller"
+            element={<CanceledbySeller />}
+          />
+          <Route
+            path="issue-summary/high-return"
+            element={<HighReturn />}
+          />
         </Route>
-
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
-
-
       </Routes>
     </Router>
   );

@@ -7,8 +7,6 @@ import {
   InputAdornment,
   Checkbox,
   FormControlLabel,
-  Snackbar,
-  Alert,
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
@@ -16,6 +14,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import axiosInstance from "./axiosInstance";
 import logo from "../../assets/logos/LOGO.png"
+import toast from "react-hot-toast";
 
 // 👉 replace with your illustration image
 import loginIllustration from "../../assets/form/Group 4.png";
@@ -26,8 +25,6 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [openError, setOpenError] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
 
   const handleLogin = async () => {
     try {
@@ -43,11 +40,12 @@ const Login = () => {
 
       navigate("/home");
     } catch (err) {
-      setErrorMsg(
-        err.response?.data?.message || "Invalid email or password"
-      );
-      setOpenError(true);
-    }
+  toast.error(
+    err.response?.data?.message || "Invalid email or password"
+  );
+}
+// toast.success("✅ Login successful!");
+
   };
 
   return (
@@ -256,17 +254,7 @@ const Login = () => {
         </Box>
       </Box>
 
-      {/* ❌ ERROR SNACKBAR */}
-      <Snackbar
-        open={openError}
-        autoHideDuration={4000}
-        onClose={() => setOpenError(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert severity="error" variant="filled">
-          {errorMsg}
-        </Alert>
-      </Snackbar>
+
     </>
   );
 };

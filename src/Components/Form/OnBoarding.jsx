@@ -4,25 +4,25 @@ import {
   Typography,
   Button,
   MenuItem,
-  Snackbar,
-  Alert,
+  Paper,
 } from "@mui/material";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axiosInstance from "./axiosInstance";
+import toast from "react-hot-toast";
+import lockimageonboarding from "../../assets/form/lock.png";
+import logo from "../../assets/logos/LOGO.png";
 
 const OnBoarding = () => {
-  const navigate = useNavigate();
-
   const [form, setForm] = useState({
     businessName: "",
     gstNumber: "",
     gstAddress: "",
     role: "",
+    managerPhoneNumber: "",
+    managerEmail: "",
   });
 
   const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState(false);
 
   /* 🔹 HANDLE INPUT */
   const handleChange = (e) => {
@@ -43,156 +43,114 @@ const OnBoarding = () => {
     if (!form.gstAddress.trim())
       newErrors.gstAddress = "GST address is required";
 
-    if (!form.role)
-      newErrors.role = "Select role";
+    if (!form.role) newErrors.role = "Select role";
+
+    if (
+      form.managerPhoneNumber &&
+      !/^[6-9]\d{9}$/.test(form.managerPhoneNumber)
+    )
+      newErrors.managerPhoneNumber =
+        "Enter valid 10-digit phone number";
+
+    if (
+      form.managerEmail &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.managerEmail)
+    )
+      newErrors.managerEmail = "Enter valid email address";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   /* 🔹 SUBMIT */
-const handleSubmit = async () => {
-  try {
-    await axiosInstance.post("/user-business-details", form);
+  const handleSubmit = async () => {
+    if (!validate()) return;
 
-    // OPTIONAL: success message
-    setSuccess(true);
+    try {
+      await axiosInstance.post("/user-business-details", form);
 
-    // 🔄 PAGE REFRESH (BEST WAY)
-    window.location.reload();
+      toast.success("🎉 Onboarding completed successfully!");
 
-  } catch (err) {
-    alert("Onboarding failed");
-    console.log(err);
-  }
-};
-
-
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (err) {
+      toast.error("❌ Onboarding failed. Please try again.");
+      console.log(err);
+    }
+  };
 
   return (
-    <>
+    <Box>
+      {/* HEADER */}
       <Box
-        minHeight="100vh"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        sx={{ background: "#DADAFF" }}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          p: "10px 30px",
+        }}
       >
-        <Box
+        <Box sx={{ height: "70px" }}>
+          <img src={logo} alt="logo" style={{ height: "100%" }} />
+        </Box>
+
+        <Typography
+          component="a"
+          href="mailto:support@raviel.in?subject=Support%20Request"
           sx={{
-            width: 420,
-            p: 4,
-            borderRadius: 4,
-            background: "#ffffff",
-            boxShadow: "0 20px 40px rgba(7,27,47,0.15)",
+            fontSize: "25px",
+            fontWeight: 600,
+            textDecoration: "none",
+            color: "black",
+            "&:hover": {
+              color: "primary.main",
+              textDecoration: "underline",
+            },
           }}
         >
-          {/* HEADER */}
-          <Typography
-            variant="h5"
-            fontWeight={700}
-            color="#071B2F"
-            mb={1}
-          >
-            Business Onboarding
-          </Typography>
-
-          <Typography color="#635BFF" mb={3}>
-            Complete your business details
-          </Typography>
-
-          {/* BUSINESS NAME */}
-          <TextField
-            fullWidth
-            label="Business Name"
-            name="businessName"
-            value={form.businessName}
-            onChange={handleChange}
-            error={!!errors.businessName}
-            helperText={errors.businessName}
-            sx={{ mb: 2 }}
-          />
-
-          {/* GST NUMBER */}
-          <TextField
-            fullWidth
-            label="GST Number"
-            name="gstNumber"
-            value={form.gstNumber}
-            onChange={handleChange}
-            error={!!errors.gstNumber}
-            helperText={errors.gstNumber}
-            sx={{ mb: 2 }}
-          />
-
-          {/* GST ADDRESS */}
-          <TextField
-            fullWidth
-            label="GST Address"
-            name="gstAddress"
-            value={form.gstAddress}
-            onChange={handleChange}
-            multiline
-            rows={3}
-            error={!!errors.gstAddress}
-            helperText={errors.gstAddress}
-            sx={{ mb: 2 }}
-          />
-
-          {/* ROLE */}
-          <TextField
-            select
-            fullWidth
-            label="Role"
-            name="role"
-            value={form.role}
-            onChange={handleChange}
-            error={!!errors.role}
-            helperText={errors.role}
-            sx={{ mb: 3 }}
-          >
-            {/* <MenuItem value="seller">Seller</MenuItem> */}
-            <MenuItem value="partner">Partner</MenuItem>
-          </TextField>
-
-          {/* SUBMIT */}
-          <Button
-            fullWidth
-            sx={{
-              py: 1.4,
-              borderRadius: 3,
-              fontSize: 16,
-              fontWeight: 600,
-              color: "#fff",
-              background:
-                "linear-gradient(135deg, #635BFF, #FF6692)",
-              "&:hover": {
-                background:
-                  "linear-gradient(135deg, #4B44E0, #FF4F85)",
-              },
-            }}
-            onClick={handleSubmit}
-          >
-            Complete Onboarding
-          </Button>
-        </Box>
+          Help
+        </Typography>
       </Box>
 
-      {/* ✅ SUCCESS MESSAGE */}
-      <Snackbar
-        open={success}
-        autoHideDuration={2000}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          severity="success"
-          variant="filled"
-          sx={{ background: "#36C76C" }}
-        >
-          🎉 Onboarding completed successfully!
-        </Alert>
-      </Snackbar>
-    </>
+      {/* CONTENT */}
+      <Box display="flex" justifyContent="center" p={2}>
+        <Paper sx={{ maxWidth: 1100, p: 3, borderRadius: 4 }}>
+          <Typography fontSize={30} fontWeight={700}>
+            Onboarding
+          </Typography>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              gap: 4,
+              alignItems: "center",
+            }}
+          >
+            {/* FORM */}
+            <Box>
+              <TextField fullWidth label="Business Name" name="businessName" value={form.businessName} onChange={handleChange} error={!!errors.businessName} helperText={errors.businessName} sx={{ mb: 2 }} />
+              <TextField fullWidth label="GST Number" name="gstNumber" value={form.gstNumber} onChange={handleChange} error={!!errors.gstNumber} helperText={errors.gstNumber} sx={{ mb: 2 }} />
+              <TextField fullWidth multiline rows={3} label="GST Address" name="gstAddress" value={form.gstAddress} onChange={handleChange} error={!!errors.gstAddress} helperText={errors.gstAddress} sx={{ mb: 2 }} />
+              <TextField fullWidth label="Manager Phone Number (Optional)" name="managerPhoneNumber" value={form.managerPhoneNumber} onChange={handleChange} error={!!errors.managerPhoneNumber} helperText={errors.managerPhoneNumber} sx={{ mb: 2 }} />
+              <TextField fullWidth label="Manager Email (Optional)" name="managerEmail" value={form.managerEmail} onChange={handleChange} error={!!errors.managerEmail} helperText={errors.managerEmail} sx={{ mb: 2 }} />
+
+              <TextField select fullWidth label="Role" name="role" value={form.role} onChange={handleChange} error={!!errors.role} helperText={errors.role} sx={{ mb: 3 }}>
+                <MenuItem value="partner">Partner</MenuItem>
+              </TextField>
+
+              <Button fullWidth sx={{ py: 1.3, fontWeight: 600, color: "#fff", background: "#5A5DF0" }} onClick={handleSubmit}>
+                Submit
+              </Button>
+            </Box>
+
+            {/* IMAGE */}
+            <Box display="flex" justifyContent="center">
+              <img src={lockimageonboarding} alt="lock" />
+            </Box>
+          </Box>
+        </Paper>
+      </Box>
+    </Box>
   );
 };
 
