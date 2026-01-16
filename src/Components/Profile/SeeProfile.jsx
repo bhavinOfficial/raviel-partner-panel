@@ -162,6 +162,8 @@ const SeeProfile = () => {
               <InfoRow label="Business Name" value={business?.businessName} />
               <InfoRow label="GST Number" value={business?.gstNumber} />
               <InfoRow label="GST Address" value={business?.gstAddress} />
+              <InfoRow label="Manager Phone Number" value={business?.managerPhoneNumber} />
+              <InfoRow label="Manager Email" value={business?.managerEmail} />
             </>
           )}
 
@@ -186,3 +188,4 @@ const InfoRow = ({ label, value }) => (
 );
 
 export default SeeProfile;
+

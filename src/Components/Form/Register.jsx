@@ -24,7 +24,7 @@ const Register = () => {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
-    mobile: "",
+    phoneNumber: "",
     email: "",
     password: "",
     role: "partner",
@@ -44,8 +44,8 @@ const Register = () => {
     if (!form.firstName.trim()) newErrors.firstName = "Required";
     if (!form.lastName.trim()) newErrors.lastName = "Required";
 
-    if (!/^[0-9]{10}$/.test(form.mobile))
-      newErrors.mobile = "Enter valid 10 digit number";
+    if (!/^[0-9]{10}$/.test(form.phoneNumber))
+      newErrors.phoneNumber = "Enter valid 10 digit number";
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       newErrors.email = "Enter valid email";
@@ -140,7 +140,7 @@ const Register = () => {
               {[
                 { label: "First Name", name: "firstName" },
                 { label: "Last Name", name: "lastName" },
-                { label: "Mobile", name: "mobile" },
+                { label: "phoneNumber", name: "phoneNumber" },
                 { label: "Email", name: "email" },
               ].map((field) => (
                 <TextField
@@ -237,7 +237,7 @@ const Register = () => {
 
           </Box>
           <Box sx={{ padding: "20px" }}>
-            <Typography component="ul" sx={{ pl: 2 }}>
+            <Typography component="ul" sx={{ pl: 2 ,color:"grey"}}>
               <Typography component="li">
                 Create your account to get started with a secure and centralized business
                 management platform.
