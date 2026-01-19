@@ -20,6 +20,8 @@ import toast from "react-hot-toast";
 import loginIllustration from "../../assets/form/Group 4.png";
 
 const Login = () => {
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -27,26 +29,28 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
+    if (loading) return;
+    setLoading(true);
+
+    const toastId = toast.loading("Logging you in...");
+
     try {
       const res = await axiosInstance.post("/user/login", {
         email,
         password,
       });
 
-      sessionStorage.setItem(
-        "token",
-        res.data.payload.accessToken
-      );
+      sessionStorage.setItem("token", res.data.payload.accessToken);
+      toast.success("Login successful", { id: toastId });
+      window.location.href = "/partner-card";
 
-      navigate("/home");
     } catch (err) {
-  toast.error(
-    err.response?.data?.message || "Invalid email or password"
-  );
-}
-// toast.success("✅ Login successful!");
-
+      toast.error("Invalid email or password", { id: toastId });
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <>
@@ -118,77 +122,77 @@ const Login = () => {
                 <Typography color="text.secondary" mb={3}>
                   Login to access your dashboard
                 </Typography>
-
-                <TextField
-                  label="Email"
-                  fullWidth
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  sx={{ mb: 2 }}
-                />
-
-                <TextField
-                  label="Password"
-                  fullWidth
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  sx={{ mb: 2 }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() =>
-                            setShowPassword((p) => !p)
-                          }
-                        >
-                          {showPassword ? (
-                            <VisibilityOff />
-                          ) : (
-                            <Visibility />
-                          )}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
                 <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  mb={3}
-                >
-                  <FormControlLabel
-                    control={<Checkbox />}
-                    label="Remember me"
-                  />
-                  <Typography
-                    color="#FF6B6B"
-                    fontSize={14}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    Forgot Password
-                  </Typography>
-                </Box>
-
-                <Button
-                  fullWidth
-                  onClick={handleLogin}
-                  sx={{
-                    py: 1.3,
-                    borderRadius: "10px",
-                    fontWeight: 700,
-                    bgcolor: "#3D6AF2",
-                    color: "#fff",
-                    "&:hover": {
-                      bgcolor: "#345CE0",
-                    },
+                  component="form"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleLogin();
                   }}
                 >
-                  Login
-                </Button>
 
+                  <TextField
+                    label="Email"
+                    fullWidth
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    sx={{ mb: 2 }}
+                  />
+
+                  <TextField
+                    label="Password"
+                    fullWidth
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    sx={{ mb: 2 }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() =>
+                              setShowPassword((p) => !p)
+                            }
+                          >
+                            {showPassword ? (
+                              <VisibilityOff />
+                            ) : (
+                              <Visibility />
+                            )}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mb={3}
+                  >
+                    <FormControlLabel
+                      control={<Checkbox />}
+                      label="Remember me"
+                    />
+                    <Typography
+                      color="#FF6B6B"
+                      fontSize={14}
+                      sx={{ cursor: "pointer" }}
+                    >
+                      Forgot Password
+                    </Typography>
+                  </Box>
+
+                  <Button
+                    fullWidth
+                    disabled={loading}
+                    onClick={handleLogin}
+                    sx={{bgcolor:"#3968eb",color:"black"}}
+                  >
+                    {loading ? "Logging in..." : "Login"}
+                  </Button>
+
+                </Box>
                 <Typography
                   mt={3}
                   fontSize={14}
@@ -215,7 +219,7 @@ const Login = () => {
                 alignItems="center"
                 justifyContent="center"
                 sx={{
-                  height:"500px",
+                  height: "500px",
                   borderRadius: "20px",
                   p: 3,
                 }}
@@ -232,7 +236,7 @@ const Login = () => {
             </Box>
 
             {/* ================= BOTTOM INFO ================= */}
-            <Box mt={4} sx={{width:"100%"}}>
+            <Box mt={4} sx={{ width: "100%" }}>
               {[
                 "Log in securely to enter your account and access the main dashboard with an overview of all platform features",
                 "After login, users are guided to complete the mandatory business onboarding process for account activation",
@@ -245,7 +249,7 @@ const Login = () => {
                 "Only after onboarding is completed and verified, full access to all tools and services is unlocked",
                 "Once activated, users can manage their business operations smoothly from a single dashboard"
               ].map((txt, i) => (
-                <Typography key={i} fontSize={16} mb={0.5} sx={{color:"grey"}}>
+                <Typography key={i} fontSize={16} mb={0.5} sx={{ color: "grey" }}>
                   • {txt}
                 </Typography>
               ))}

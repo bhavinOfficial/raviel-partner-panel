@@ -28,6 +28,7 @@ import EditProfile from "./Components/Profile/EditProfile";
 import SellerDetail from "./Components/Seller_Desk/SellerDetail";
 
 import { Toaster } from "react-hot-toast";
+import PartnerCard from "./Components/PaymentCards.jsx/PartnerCard";
 
 const App = () => {
   return (
@@ -36,6 +37,9 @@ const App = () => {
       <Toaster position="top-center" reverseOrder={false} />
 
       <Routes>
+        {/* Root redirect to login */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
         {/* Public routes */}
         <Route
           path="/login"
@@ -66,6 +70,15 @@ const App = () => {
 
         {/* Protected layout routes */}
         <Route
+          path="partner-card"
+          element={
+            <ProtectedRoute>
+              <PartnerCard />
+            </ProtectedRoute>
+          }>
+
+        </Route>
+        <Route
           path="/"
           element={
             <ProtectedRoute>
@@ -73,6 +86,7 @@ const App = () => {
             </ProtectedRoute>
           }
         >
+
           <Route index element={<Home />} />
           <Route path="shipment" element={<Shipment />} />
           <Route path="my_seller" element={<MySeller />} />

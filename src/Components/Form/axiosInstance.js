@@ -9,11 +9,14 @@ const axiosInstance = axios.create({
   },
 });
 
-// 🔐 Attach token
+// 🔐 Attach token (ONLY if skipAuth !== true)
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = sessionStorage.getItem("token");
+    if (config.skipAuth) {
+      return config; // 🚫 DO NOT attach token
+    }
 
+    const token = sessionStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -23,12 +26,12 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// 🚨 Handle 401 (NO redirect here)
+// 🚨 Handle 401
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      sessionStorage.removeItem("token");
+      // optional handling
     }
     return Promise.reject(error);
   }

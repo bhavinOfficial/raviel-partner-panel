@@ -26,7 +26,7 @@ export const UserProvider = ({ children }) => {
     }
 
     refreshUser().finally(() => setLoading(false));
-  }, [sessionStorage]);
+  }, []);
 
   return (
     <UserContext.Provider
