@@ -13,7 +13,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     if (config.skipAuth) {
-      return config; // 🚫 DO NOT attach token
+      return config; 
     }
 
     const token = sessionStorage.getItem("token");

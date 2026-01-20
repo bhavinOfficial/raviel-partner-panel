@@ -40,8 +40,7 @@ const PartnerCard = () => {
 
       const response = await axiosInstance.get("/subscription-plans", {
         params: {
-          userType: "partner",
-          planType: "monthly",
+          userType: "partner"
         },
         skipAuth: true,
       });
@@ -93,6 +92,25 @@ const PartnerCard = () => {
     );
   }
 
+  // id pass
+  const handlePlanSelect = async (planId) => {
+    try {
+      const response = await axiosInstance.get(
+        "/subscription-plans",
+        {
+          planId: planId,   // 👈 ID pass thai gayi
+          userType: "partner",
+        }
+      );
+
+      console.log("Plan selected:", response.data);
+
+      navigate("/"); // success pachi redirect
+    } catch (error) {
+      console.error("Plan select failed", error);
+    }
+  };
+
   return (
     <Box sx={{ bgcolor: "#F8FAFF", minHeight: "100vh", py: 6 }}>
       <Container maxWidth="xl">
@@ -113,12 +131,20 @@ const PartnerCard = () => {
           {plans.map((plan) => (
             <Box key={plan.id} sx={{ minWidth: 320 }}>
               <Card
+                onClick={() => handlePlanSelect(plan.id)}
                 sx={{
                   height: "100%",
                   borderRadius: 4,
+                  cursor: "pointer",
                   background: `linear-gradient(180deg, ${plan.bg}, #fff)`,
+                  transition: "0.3s",
+                  "&:hover": {
+                    transform: "translateY(-6px)",
+                    boxShadow: "0 12px 30px rgba(0,0,0,0.15)",
+                  },
                 }}
               >
+
                 {plan.popular && (
                   <Chip
                     label="MOST POPULAR"
@@ -164,18 +190,11 @@ const PartnerCard = () => {
                     </Typography>
                   </Typography>
 
-                  {plan.features.map((f, i) => (
-                    <Box key={i} sx={{ display: "flex", gap: 1 }}>
-                      <Check sx={{ color: COLORS.success }} />
-                      <Typography variant="body2">{f}</Typography>
-                    </Box>
-                  ))}
-
                   {/* ✅ NAVIGATION BUTTON */}
                   <Button
                     fullWidth
                     sx={{
-                      mt: 3,
+                      my: 3,
                       py: 1.4,
                       bgcolor: COLORS.primary,
                       color: "#fff",
@@ -185,6 +204,15 @@ const PartnerCard = () => {
                   >
                     Get Started
                   </Button>
+
+                  {plan.features.map((f, i) => (
+                    <Box key={i} sx={{ display: "flex", gap: 1 }}>
+                      <Check sx={{ color: COLORS.success }} />
+                      <Typography variant="body2">{f}</Typography>
+                    </Box>
+                  ))}
+
+
 
                 </CardContent>
               </Card>
