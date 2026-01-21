@@ -1,63 +1,46 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useUser } from "../Components/context/UserProvider";
 
+const isProfileIncomplete = (user) => {
+  const profile = user?.payload;
+  const business = profile?.userBusinessDetails;
+
+  if (!profile) return true;
+
+  // Mandatory personal
+  if (!profile.firstName) return true;
+  if (!profile.lastName) return true;
+  if (!profile.phoneNumber) return true;
+
+  // Mandatory business
+  if (!business?.businessName) return true;
+  if (!business?.gstNumber) return true;
+  if (!business?.gstAddress) return true;
+
+  return false;
+};
+
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useUser();
   const location = useLocation();
   const token = sessionStorage.getItem("token");
 
-  /* =========================
-     1️⃣ LOADING STATE
-  ========================= */
-  if (loading) {
-    return (
-      <div style={{ textAlign: "center", marginTop: "20vh" }}>
-        Loading...
-      </div>
-    );
-  }
+  if (loading) return <div style={{ textAlign: "center" }}>Loading...</div>;
 
-  /* =========================
-     2️⃣ NOT AUTHENTICATED
-  ========================= */
-  if (!token) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-        state={{ from: location }}
-      />
-    );
-  }
+  if (!token) return <Navigate to="/login" replace />;
 
-  /* =========================
-     3️⃣ TOKEN EXISTS BUT USER NOT READY
-  ========================= */
-  if (!user || !user.payload) {
-    // Token exists but user data is invalid, clear token and redirect
-    // sessionStorage.removeItem("token");
-    return <Navigate to="/login" replace />;
-  }
+  if (!user || !user.payload) return <Navigate to="/login" replace />;
 
-  const { isOnboardingCompleted } = user.payload;
+  const incomplete = isProfileIncomplete(user);
 
-  /* =========================
-     4️⃣ FORCE ONBOARDING
-  ========================= */
-  if (!isOnboardingCompleted && location.pathname !== "/onboarding") {
+  if (incomplete && location.pathname !== "/onboarding") {
     return <Navigate to="/onboarding" replace />;
   }
 
-  /* =========================
-     5️⃣ BLOCK ONBOARDING AFTER COMPLETION
-  ========================= */
-  if (isOnboardingCompleted && location.pathname === "/onboarding") {
+  if (!incomplete && location.pathname === "/onboarding") {
     return <Navigate to="/" replace />;
   }
 
-  /* =========================
-     6️⃣ ALLOW ACCESS
-  ========================= */
   return children;
 };
 

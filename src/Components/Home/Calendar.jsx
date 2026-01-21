@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import axiosInstance from "../Form/axiosInstance";
 import {
   Box,
   Typography,
@@ -18,7 +19,7 @@ const getSunday = (date) => {
   return d;
 };
 
-/* 🔹 date key */
+/* 🔹 date key (YYYY-MM-DD) */
 const formatKey = (date) => date.toISOString().split("T")[0];
 
 const Calendar = () => {
@@ -29,19 +30,16 @@ const Calendar = () => {
   const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
 
-  // 📦 calendar status
+  // 📦 upload status
   const [uploaded, setUploaded] = useState({});
 
-  // 📁 Excel storage (3 alag)
-  const [todayExcel, setTodayExcel] = useState({});
-  const [weeklyExcel, setWeeklyExcel] = useState({});
-  const [monthlyExcel, setMonthlyExcel] = useState({});
-console.log(todayExcel);
+  // 🔴 backend error message
+  const [uploadError, setUploadError] = useState("");
 
   // 🔗 refs
-  const todayRef = useRef();
-  const weeklyRef = useRef();
-  const monthlyRef = useRef();
+  const dailyRef = useRef(null);
+  const weeklyRef = useRef(null);
+  const monthlyRef = useRef(null);
 
   /* ⬅️ ➡️ week move */
   const moveLeft = () => {
@@ -61,13 +59,13 @@ console.log(todayExcel);
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + index);
 
-    const key = formatKey(date);
+    const dateKey = formatKey(date);
 
     let status = "Upcoming";
     let color = "#e0e0e0";
 
     if (date < today) {
-      if (uploaded[key]) {
+      if (uploaded[dateKey]) {
         status = "Uploaded";
         color = "#2ecc71";
       } else {
@@ -77,8 +75,8 @@ console.log(todayExcel);
     }
 
     if (date.getTime() === today.getTime()) {
-      status = uploaded[key] ? "Uploaded" : "Today";
-      color = uploaded[key] ? "#2ecc71" : "#f9c30a";
+      status = uploaded[dateKey] ? "Uploaded" : "Today";
+      color = uploaded[dateKey] ? "#2ecc71" : "#f9c30a";
     }
 
     return {
@@ -87,42 +85,72 @@ console.log(todayExcel);
       number: date.getDate(),
       status,
       color,
-      key,
+      dateKey,
     };
   });
 
   /* 🪟 popup */
   const handleOpen = (day) => {
     setSelectedDate(day);
+    setUploadError(""); // clear old error
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedDate(null);
+    setUploadError("");
+  };
+
+  /* 📤 Backend upload */
+  const uploadToBackend = async (file, category, dateKey) => {
+    const formData = new FormData();
+
+    formData.append("timeline-data-management-file", file);
+    formData.append("timeline-data-tenure", category); // daily | weekly | monthly
+    formData.append("date", dateKey);
+
+    return axiosInstance.post(
+      "/partner/timeline-data-management",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
   };
 
   /* 📤 Excel upload handler */
-  const handleExcelUpload = (e, type) => {
+  const handleExcelUpload = async (e, category) => {
     const file = e.target.files[0];
     if (!file || !selectedDate) return;
 
-    const key = selectedDate.key;
+    const dateKey = selectedDate.dateKey;
+    const ext = file.name.split(".").pop();
 
-    if (type === "today") {
-      setTodayExcel((prev) => ({ ...prev, [key]: file }));
+    const renamedFile = new File(
+      [file],
+      `${category}_${dateKey}.${ext}`,
+      { type: file.type }
+    );
+
+    try {
+      await uploadToBackend(renamedFile, category, dateKey);
+
+      setUploaded((p) => ({ ...p, [dateKey]: true }));
+      handleClose(); // ✅ success
+    } catch (err) {
+      // 🔴 ONLY backend payload message
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Upload failed";
+
+      setUploadError(message); // popup bottom ma show
+    } finally {
+      e.target.value = ""; // reset input
     }
-
-    if (type === "weekly") {
-      setWeeklyExcel((prev) => ({ ...prev, [key]: file }));
-    }
-
-    if (type === "monthly") {
-      setMonthlyExcel((prev) => ({ ...prev, [key]: file }));
-    }
-
-    setUploaded((prev) => ({ ...prev, [key]: true }));
-    handleClose();
   };
 
   return (
@@ -131,20 +159,18 @@ console.log(todayExcel);
       <Box
         sx={{
           p: 3,
-          boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
           borderRadius: "20px",
-          bgcolor: "white",
+          bgcolor: "#fff",
+          boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
         }}
       >
         {/* HEADER */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
           <Box>
-            <Typography sx={{ fontWeight: 700, fontSize: 20 }}>
+            <Typography fontWeight={700} fontSize={20}>
               {startDate.toLocaleString("default", { month: "long" })}
             </Typography>
-            <Typography sx={{ color: "#555" }}>
-              {startDate.getFullYear()}
-            </Typography>
+            <Typography color="#555">{startDate.getFullYear()}</Typography>
           </Box>
 
           <Box>
@@ -170,9 +196,12 @@ console.log(todayExcel);
             }}
           />
 
-          {days.map((item, index) => (
-            <Box key={index} sx={{ flex: 1, textAlign: "center", zIndex: 1 }}>
-              <Typography sx={{ fontSize: 12, fontWeight: 600, mb: 1 }}>
+          {days.map((item) => (
+            <Box
+              key={item.dateKey}
+              sx={{ flex: 1, textAlign: "center", zIndex: 1 }}
+            >
+              <Typography fontSize={12} fontWeight={600}>
                 {item.day}
               </Typography>
 
@@ -188,16 +217,14 @@ console.log(todayExcel);
                   alignItems: "center",
                   justifyContent: "center",
                   fontWeight: 700,
-                  boxShadow: "0 6px 14px rgba(0,0,0,0.22)",
                   cursor: "pointer",
-                  transition: "0.25s",
-                  "&:hover": { transform: "scale(1.1)" },
+                  boxShadow: "0 6px 14px rgba(0,0,0,0.22)",
                 }}
               >
                 {item.number}
               </Box>
 
-              <Typography sx={{ fontSize: 12, mt: 1, color: "#555" }}>
+              <Typography fontSize={12} mt={1}>
                 {item.status}
               </Typography>
             </Box>
@@ -206,152 +233,105 @@ console.log(todayExcel);
       </Box>
 
       {/* POPUP */}
-      <Dialog sx={{
-        bgcolor:"transparent",
-        borderRadius:"200px"
-      }} open={open} onClose={handleClose} maxWidth="md" fullWidth>
+<Dialog
+  open={open}
+  onClose={handleClose}
+  maxWidth="md"
+  fullWidth
+  PaperProps={{ sx: { borderRadius: "22px" } }}
+>
   {selectedDate && (
     <DialogContent
       sx={{
-         bgcolor: "#fff",
-          borderRadius: "20px",
-          p: 3,
-          boxShadow: "0 10px 28px rgba(0,0,0,0.2)",
+        p: 4,
+        position: "relative", // 🔑 important for absolute close btn
       }}
     >
-      {/* MAIN CARD */}
-      <Box
+      {/* ❌ CLOSE ICON (RIGHT TOP) */}
+      <IconButton
+        onClick={handleClose}
         sx={{
-          position: "relative",
+          position: "absolute",
+          top: 16,
+          right: 16,
+          width: 40,
+          height: 40,
+          bgcolor: "#ff3b3b",
+          color: "#fff",
+          fontSize: 20,
+          "&:hover": {
+            bgcolor: "#e60000",
+          },
         }}
       >
-        {/* ❌ Close */}
-        <IconButton
-          onClick={handleClose}
-          sx={{
-            position: "absolute",
-            right: 16,
-            width: 40,
-            height: 40,
-            bgcolor: "red",
-            color: "#fff",
-            fontSize: 22,
-            "&:hover": { bgcolor: "#d60000" },
-          }}
+        ✕
+      </IconButton>
+
+      {/* 🔒 HIDDEN FILE INPUTS */}
+      <input
+        type="file"
+        hidden
+        accept=".xls,.xlsx"
+        ref={dailyRef}
+        onChange={(e) => handleExcelUpload(e, "daily")}
+      />
+      <input
+        type="file"
+        hidden
+        accept=".xls,.xlsx"
+        ref={weeklyRef}
+        onChange={(e) => handleExcelUpload(e, "weekly")}
+      />
+      <input
+        type="file"
+        hidden
+        accept=".xls,.xlsx"
+        ref={monthlyRef}
+        onChange={(e) => handleExcelUpload(e, "monthly")}
+      />
+
+      <Typography fontSize={20} fontWeight={700} mb={3}>
+        {selectedDate.number}{" "}
+        {selectedDate.date.toLocaleString("default", { month: "long" })}{" "}
+        {selectedDate.date.getFullYear()}
+      </Typography>
+
+      <Box sx={{ display: "flex", justifyContent: "center", gap: 3 }}>
+        <Button
+          onClick={() => dailyRef.current?.click()}
+          sx={{ bgcolor: "#A7BBFF", color: "black", px: 3, borderRadius: "20px" }}
         >
-          ✕
-        </IconButton>
+          Daily Excel
+        </Button>
 
-        {/* HEADER */}
-        <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 4 }}>
-          <Box
-            sx={{
-              width: 44,
-              height: 44,
-              borderRadius: "50%",
-              bgcolor: "#f5c400",
-            }}
-          />
-
-          <Box>
-            <Typography sx={{ fontSize: 20, fontWeight: 700 }}>
-              {selectedDate.number} -{" "}
-              {selectedDate.date.toLocaleString("default", { month: "long" })} -{" "}
-              {selectedDate.date.getFullYear()}
-            </Typography>
-            <Typography sx={{ fontSize: 14, color: "#555" }}>
-              {selectedDate.day}
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* HIDDEN INPUTS (unchanged) */}
-        <input
-          type="file"
-          accept=".xls,.xlsx"
-          hidden
-          ref={todayRef}
-          onChange={(e) => handleExcelUpload(e, "today")}
-        />
-        <input
-          type="file"
-          accept=".xls,.xlsx"
-          hidden
-          ref={weeklyRef}
-          onChange={(e) => handleExcelUpload(e, "weekly")}
-        />
-        <input
-          type="file"
-          accept=".xls,.xlsx"
-          hidden
-          ref={monthlyRef}
-          onChange={(e) => handleExcelUpload(e, "monthly")}
-        />
-
-        {/* BUTTONS */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            gap: 3,
-            flexWrap: "wrap",
-          }}
+        <Button
+          onClick={() => weeklyRef.current?.click()}
+          sx={{ bgcolor: "#A7BBFF", color: "black", px: 3, borderRadius: "20px" }}
         >
-          <Button
-            onClick={() => todayRef.current.click()}
-            sx={{
-              px: 6,
-              py: 2,
-              borderRadius: "14px",
-              fontSize: 16,
-              fontWeight: 600,
-              textTransform: "none",
-              bgcolor: "#b3c6ff",
-              color: "#000",
-              boxShadow: "0 6px 14px rgba(0,0,0,0.25)",
-              "&:hover": { bgcolor: "#9fb6ff" },
-            }}
-          >
-            Daily Excel
-          </Button>
+          Weekly Excel
+        </Button>
 
-          <Button
-            onClick={() => weeklyRef.current.click()}
-            sx={{
-              px: 6,
-              py: 2,
-              borderRadius: "14px",
-              fontSize: 16,
-              fontWeight: 600,
-              textTransform: "none",
-              bgcolor: "#b3c6ff",
-              color: "#000",
-              boxShadow: "0 6px 14px rgba(0,0,0,0.25)",
-              "&:hover": { bgcolor: "#9fb6ff" },
-            }}
-          >
-            Weekly Excel
-          </Button>
-
-          <Button
-            onClick={() => monthlyRef.current.click()}
-            sx={{
-              px: 6,
-              py: 2,
-              borderRadius: "14px",
-              fontSize: 16,
-              fontWeight: 600,
-              textTransform: "none",
-              bgcolor: "#b3c6ff",
-              color: "#000",
-              boxShadow: "0 6px 14px rgba(0,0,0,0.25)",
-              "&:hover": { bgcolor: "#9fb6ff" },
-            }}
-          >
-            Monthly Excel
-          </Button>
-        </Box>
+        <Button
+          onClick={() => monthlyRef.current?.click()}
+          sx={{ bgcolor: "#A7BBFF", color: "black", px: 3, borderRadius: "20px" }}
+        >
+          Monthly Excel
+        </Button>
       </Box>
+
+      {/* 🔴 BACKEND ERROR MESSAGE (BOTTOM) */}
+      {uploadError && (
+        <Typography
+          sx={{
+            mt: 3,
+            color: "red",
+            fontSize: 14,
+            textAlign: "center",
+          }}
+        >
+          {uploadError}
+        </Typography>
+      )}
     </DialogContent>
   )}
 </Dialog>

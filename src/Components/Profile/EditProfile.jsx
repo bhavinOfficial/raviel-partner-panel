@@ -5,14 +5,16 @@ import {
   Typography,
   Paper,
   Divider,
+  CircularProgress,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useUser } from "../context/UserProvider";
 import axiosInstance from "../Form/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const EditProfile = () => {
-  const { user, setUser } = useUser();
+  const { user, refreshUser } = useUser();
   const navigate = useNavigate();
 
   const profile = user?.payload;
@@ -25,18 +27,19 @@ const EditProfile = () => {
     businessName: "",
     gstNumber: "",
     gstAddress: "",
-    managerPhoneNumber:"",
-    managerEmail:""
+    managerPhoneNumber: "",
+    managerEmail: "",
   });
 
+  const [loading, setLoading] = useState(false); // 🔑 LOADER STATE
+
+  /* 🔄 Prefill form */
   useEffect(() => {
     if (profile) {
       setForm({
         firstName: profile.firstName || "",
         lastName: profile.lastName || "",
         phoneNumber: profile.phoneNumber || "",
-
-        // ❌ BUSINESS DETAILS COMMENT
         businessName: business?.businessName || "",
         gstNumber: business?.gstNumber || "",
         gstAddress: business?.gstAddress || "",
@@ -44,183 +47,125 @@ const EditProfile = () => {
         managerEmail: business?.managerEmail || "",
       });
     }
-  }, [profile]);
-
+  }, [profile, business]);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
+  /* 🚀 SAVE PROFILE */
   const handleSubmit = async () => {
+    if (loading) return; // 🚫 prevent double click
+
     try {
-      const res = await axiosInstance.put("/user", {
+      setLoading(true); // ⏳ start loader
+
+      await axiosInstance.put("/user", {
         firstName: form.firstName,
         lastName: form.lastName,
         phoneNumber: form.phoneNumber,
-
-        // ❌ BUSINESS DETAILS COMMENT
-        // userBusinessDetails: {
         businessName: form.businessName,
         gstNumber: form.gstNumber,
         gstAddress: form.gstAddress,
         managerPhoneNumber: form.managerPhoneNumber,
-        managerEmail: form.managerEmail
-        // },
+        managerEmail: form.managerEmail,
       });
 
-      setUser(res.data);
+      await refreshUser();
+
+      toast.success("Profile updated successfully 🎉");
       navigate("/profile");
     } catch (err) {
-      console.error("❌ Update failed", err);
+      console.error(err);
+      toast.error("Failed to update profile");
+    } finally {
+      setLoading(false); // ✅ stop loader
     }
   };
 
-
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        p: 2,
-      }}
-    >
-      <Paper
-        elevation={0}
-        sx={{
-          width: "100%",
-          maxWidth: 760,
-          borderRadius: "24px",
-          p: { xs: 3, md: 5 },
-          bgcolor: "#FFFFFF",
-          boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
-        }}
-      >
-        {/* Header */}
-        <Typography
-          fontSize={26}
-          fontWeight={700}
-          color="#071B2F"
-          mb={1}
-        >
+    <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+      <Paper sx={{ maxWidth: 760, p: 5, borderRadius: "24px" }}>
+        <Typography fontSize={26} fontWeight={700} mb={1}>
           Edit Profile
         </Typography>
 
-        <Typography fontSize={14} color="#071B2F" mb={4} sx={{ opacity: 0.7 }}>
-          Update your personal and business details
-        </Typography>
+        <Divider sx={{ my: 3 }} />
 
         {/* Personal Info */}
-        <Typography
-          fontWeight={600}
-          color="#635BFF"
-          mb={2}
-        >
-          Personal Information
-        </Typography>
-
-        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-          <TextField
-            label="First Name"
-            name="firstName"
-            value={form.firstName}
-            onChange={handleChange}
-            fullWidth
-          />
-
-          <TextField
-            label="Last Name"
-            name="lastName"
-            value={form.lastName}
-            onChange={handleChange}
-            fullWidth
-          />
-        </Box>
-
         <TextField
-          label="phoneNumber Number"
+          label="First Name"
+          name="firstName"
+          value={form.firstName}
+          onChange={handleChange}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          label="Last Name"
+          name="lastName"
+          value={form.lastName}
+          onChange={handleChange}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          label="Phone Number"
           name="phoneNumber"
           value={form.phoneNumber}
           onChange={handleChange}
           fullWidth
-          sx={{ mt: 2 }}
+          sx={{ mb: 2 }}
         />
 
-        <Divider sx={{ my: 4, borderColor: "#DADAFF" }} />
+        <Divider sx={{ my: 3 }} />
 
         {/* Business Info */}
-        <Box
-          sx={{
-            borderRadius: "16px",
-            p: 3,
-          }}
-        >
-          <Typography fontWeight={600} color="#071B2F" mb={2}>
-            Business Information
-          </Typography>
-
-          <TextField
-            label="Business Name"
-            name="businessName"
-            value={form.businessName}
-            onChange={handleChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-
-          <TextField
-            label="GST Number"
-            name="gstNumber"
-            value={form.gstNumber}
-            onChange={handleChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-
-          <TextField
-            label="GST Address"
-            name="gstAddress"
-            value={form.gstAddress}
-            onChange={handleChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Manager Phone Number (Optional)"
-            name="managerPhoneNumber"
-            value={form.managerPhoneNumber}
-            onChange={handleChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-
-          <TextField
-            label="Manager Email (Optional)"
-            name="managerEmail"
-            value={form.managerEmail}
-            onChange={handleChange}
-            fullWidth
-          />
-        </Box>
+        <TextField
+          label="Business Name"
+          name="businessName"
+          value={form.businessName}
+          onChange={handleChange}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          label="GST Number"
+          name="gstNumber"
+          value={form.gstNumber}
+          onChange={handleChange}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          label="GST Address"
+          name="gstAddress"
+          value={form.gstAddress}
+          onChange={handleChange}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          label="Manager Phone (Optional)"
+          name="managerPhoneNumber"
+          value={form.managerPhoneNumber}
+          onChange={handleChange}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          label="Manager Email (Optional)"
+          name="managerEmail"
+          value={form.managerEmail}
+          onChange={handleChange}
+          fullWidth
+        />
 
         {/* Actions */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            mt: 5,
-            gap: 2,
-          }}
-        >
+        <Box sx={{ display: "flex", gap: 2, mt: 4 }}>
           <Button
             fullWidth
             variant="outlined"
-            sx={{
-              borderColor: "#635BFF",
-              color: "#635BFF",
-              borderRadius: "12px",
-              textTransform: "none",
-              py: 1.2,
-            }}
+            disabled={loading}
             onClick={() => navigate("/profile")}
           >
             Cancel
@@ -229,18 +174,24 @@ const EditProfile = () => {
           <Button
             fullWidth
             variant="contained"
-            sx={{
-              bgcolor: "#635BFF",
-              borderRadius: "12px",
-              textTransform: "none",
-              py: 1.2,
-              "&:hover": {
-                bgcolor: "#5148e5",
-              },
-            }}
+            disabled={loading}
             onClick={handleSubmit}
+            sx={{ position: "relative" }}
           >
-            Save Changes
+            {loading ? (
+              <>
+                <CircularProgress
+                  size={22}
+                  sx={{
+                    color: "white",
+                    mr: 1,
+                  }}
+                />
+                Saving...
+              </>
+            ) : (
+              "Save Changes"
+            )}
           </Button>
         </Box>
       </Paper>
