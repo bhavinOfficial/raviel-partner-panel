@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Container } from "@mui/material";
 import axiosInstance from "../Components/Form/axiosInstance";
+
 import SearchFilters from "../Components/Payout/SearchFilters";
 import SellerWisePayoutSummary from "../Components/Payout/SellerWisePayoutSummary";
 import SellerWisePayout2Table from "../Components/Payout/SellerWisePayout2Table";
 import SellerWisePayout from "../Components/Payout/SellerWisePayout";
 
+/* 🔹 Format Month (MM-YYYY) */
 const formatMonth = (date) => {
   if (!date) return "";
   const d = new Date(date);
@@ -15,25 +17,29 @@ const formatMonth = (date) => {
 const Payout = () => {
   const [allRows, setAllRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
+
   const [month, setMonth] = useState("");
   const [sellerId, setSellerId] = useState("");
   const [sellerName, setSellerName] = useState("");
   const [loading, setLoading] = useState(false);
 
+  /* 🔹 Fetch Sellers */
   useEffect(() => {
     const fetchSellers = async () => {
       try {
         setLoading(true);
+
         const res = await axiosInstance.get("/partner/fetch-all-sellers");
 
         const mapped = (res.data?.payload || []).map((item) => ({
           month: formatMonth(item.launchingDate),
           sellerId: item.sellerId,
           sellerName: item.sellerName,
+
           fixed: item.fixedPaymentAmount ?? 0,
           nmv: item.NMVPaymentAmount ?? 0,
 
-          // ✅ IMPORTANT (API KEYS 그대로)
+          // ✅ API keys 그대로
           fixedPaymentReceivedOrNot: !!item.fixedPaymentReceivedOrNot,
           NMVPaymentReceivedOrNot: !!item.NMVPaymentReceivedOrNot,
         }));
@@ -48,6 +54,7 @@ const Payout = () => {
     fetchSellers();
   }, []);
 
+  /* 🔹 Apply Filters */
   const handleApply = () => {
     setFilteredRows(
       allRows.filter(
@@ -59,7 +66,7 @@ const Payout = () => {
     );
   };
 
-  // ✅ ONE TOGGLE HANDLER FOR BOTH TABLES
+  /* 🔹 ONE Toggle Handler for both tables */
   const handleToggleReceived = async (sellerId, value, paymentType) => {
     await axiosInstance.put(
       `/partner/confirm-seller-payment/${sellerId}`,
@@ -75,22 +82,22 @@ const Payout = () => {
         : "NMVPaymentReceivedOrNot";
 
     setAllRows((prev) =>
-      prev.map((r) =>
-        r.sellerId === sellerId ? { ...r, [key]: value } : r
+      prev.map((row) =>
+        row.sellerId === sellerId ? { ...row, [key]: value } : row
       )
     );
 
     setFilteredRows((prev) =>
-      prev.map((r) =>
-        r.sellerId === sellerId ? { ...r, [key]: value } : r
+      prev.map((row) =>
+        row.sellerId === sellerId ? { ...row, [key]: value } : row
       )
     );
   };
 
-
   return (
     <Container maxWidth={false} sx={{ maxWidth: "1400px" }}>
-      <SellerWisePayout/>
+      <SellerWisePayout />
+
       <SearchFilters
         month={month}
         setMonth={setMonth}
