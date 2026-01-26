@@ -38,7 +38,7 @@ const PartnerCard = () => {
     try {
       setLoading(true);
 
-      const response = await axiosInstance.get("/subscription-plans", {
+      const response = await axiosInstance.get("/subscriptions/fetch-plans", {
         params: {
           userType: "partner"
         },
@@ -96,7 +96,7 @@ const PartnerCard = () => {
   const handlePlanSelect = async (planId) => {
     try {
       const response = await axiosInstance.get(
-        "/subscription-plans",
+        "/subscriptions/fetch-plans",
         {
           planId: planId,   // 👈 ID pass thai gayi
           userType: "partner",
