@@ -72,7 +72,7 @@ const Payout = () => {
   const handleToggleReceived = async (sellerId, value, paymentType) => {
     try {
       await axiosInstance.put(
-        `/partner/confirm-seller-payment/${sellerId}`,
+        `/partner/confirm-seller-payment/${id}`,
         {
           isPaymentReceivedOrNot: value,
           paymentType,

@@ -25,10 +25,10 @@ import HighReturn from "./Components/IssueSummary/HighReturn";
 import AddNewSeller from "./Pages/AddNewSeller";
 import OnBoarding from "./Components/Form/OnBoarding";
 import EditProfile from "./Components/Profile/EditProfile";
-import SellerDetail from "./Components/Seller_Desk/SellerDetail";
 
 import { Toaster } from "react-hot-toast";
 import PartnerCard from "./Components/PaymentCards.jsx/PartnerCard";
+import SellerMain from "./Components/Seller_Desk/SellerMain";
 
 const App = () => {
   return (
@@ -102,7 +102,7 @@ const App = () => {
           <Route path="edit-profile" element={<EditProfile />} />
 
           {/* Seller Desk */}
-          <Route path="seller_desk/:sellerId" element={<SellerDetail />} />
+          <Route path="seller_desk/:sellerId" element={<SellerMain />} />
 
           {/* Issue Summary */}
           <Route

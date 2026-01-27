@@ -1,8 +1,44 @@
 import React from "react";
 import { Box, Typography, Stack } from "@mui/material";
+import { useParams } from "react-router-dom";
 
-const SellerDetail = ({ seller }) => {
-  if (!seller) return null;
+/* 🔹 SAME dummy data (later API thi replace kari sako) */
+const SELLERS = [
+  {
+    sellerId: "XZY058",
+    name: "Hemal Creation",
+    email: "hemal@gmail.com",
+    launchDate: "12-12-2025",
+  },
+  {
+    sellerId: "XKHY08",
+    name: "Khushal satani",
+    email: "khushal@gmail.com",
+    launchDate: "12-12-2025",
+  },
+  {
+    sellerId: "KHU005",
+    name: "Jayesh Bhayani",
+    email: "jayesh@gmail.com",
+    launchDate: "12-12-2025",
+  },
+];
+
+const SellerDetail = () => {
+  const { sellerId } = useParams();
+
+  // 🔍 Find seller using route param
+  const seller = SELLERS.find(
+    (s) => s.sellerId === sellerId
+  );
+
+  if (!seller) {
+    return (
+      <Typography fontWeight={600}>
+        Seller not found
+      </Typography>
+    );
+  }
 
   return (
     <Box
@@ -23,8 +59,8 @@ const SellerDetail = ({ seller }) => {
             borderRadius: "50%",
           }}
         />
-        <Typography variant="h6" fontWeight={700}>
-          Seller details
+        <Typography variant="h5" fontWeight={700}>
+          Seller Details
         </Typography>
       </Stack>
 
@@ -33,7 +69,7 @@ const SellerDetail = ({ seller }) => {
         <DetailRow label="Seller ID" value={seller.sellerId} />
         <DetailRow label="Seller Name" value={seller.name} />
         <DetailRow label="Seller Email" value={seller.email} />
-        <DetailRow label="Launch date" value={seller.launchDate} />
+        <DetailRow label="Launch Date" value={seller.launchDate} />
       </Stack>
     </Box>
   );

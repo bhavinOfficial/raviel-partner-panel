@@ -12,34 +12,10 @@ import {
   Switch,
   Button,
 } from "@mui/material";
-import toast from "react-hot-toast";
 
-const SellerWisePayoutSummary = ({ rows = [], loading, onToggle }) => {
+const SellerWisePayoutSummary = ({ rows = [], loading }) => {
   const INITIAL_COUNT = 5;
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
-  const [updatingId, setUpdatingId] = useState(null);
-
-  const handleToggle = async (sellerId, value) => {
-    if (!onToggle) return;
-
-    setUpdatingId(sellerId);
-
-    try {
-      await onToggle(sellerId, value, "Fixed");
-
-      // ✅ SUCCESS TOAST
-      toast.success(
-        value
-          ? "Fixed payment marked as received"
-          : "Fixed payment marked as not received"
-      );
-    } catch (error) {
-      // ❌ ERROR TOAST
-      toast.error("Failed to update fixed payment status");
-    } finally {
-      setUpdatingId(null);
-    }
-  };
 
   return (
     <Box sx={{ pt: 3, width: "100%" }}>
@@ -68,21 +44,19 @@ const SellerWisePayoutSummary = ({ rows = [], loading, onToggle }) => {
 
                 <TableBody>
                   {rows.slice(0, visibleCount).map((row) => (
-                    <TableRow key={`${row.sellerId}-${row.month}`}>
+                    <TableRow key={`${row.id}-${row.month}`}>
                       <TableCell>{row.month}</TableCell>
                       <TableCell>{row.sellerId}</TableCell>
                       <TableCell>{row.sellerName}</TableCell>
                       <TableCell>₹{row.fixed}</TableCell>
+
+                      {/* 🔒 STATIC TOGGLE (READ ONLY) */}
                       <TableCell>
                         <Switch
-                          checked={Boolean(row.fixedPaymentReceivedOrNot)}
-                          disabled={updatingId === row.sellerId}
-                          onChange={(e) =>
-                            handleToggle(
-                              row.sellerId,
-                              e.target.checked
-                            )
-                          }
+                          checked={Boolean(
+                            row.fixedPaymentReceivedOrNot
+                          )}
+                          // disabled   // 👈 no interaction
                         />
                       </TableCell>
                     </TableRow>
@@ -92,7 +66,7 @@ const SellerWisePayoutSummary = ({ rows = [], loading, onToggle }) => {
             </TableContainer>
 
             {rows.length > INITIAL_COUNT && (
-              <Box display="flex" justifyContent="center" mt={2}>
+              <Box display="flex" justifyContent="center" mt={2} gap={2}>
                 <Button onClick={() => setVisibleCount(rows.length)}>
                   Show More
                 </Button>
