@@ -4,52 +4,55 @@ import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import ReportProblemOutlinedIcon from "@mui/icons-material/ReportProblemOutlined";
-import PixIcon from '@mui/icons-material/Pix';
+import PixIcon from "@mui/icons-material/Pix";
 
-const stats = [
-  {
-    title: "Total Order",
-    value: "15,000",
-    bg: "#DADAFF",
-    iconBg: "#635BFF",
-    icon: <CurrencyRupeeIcon />,
-  },
-  {
-    title: "Total GMV",
-    value: "15,15,000",
-    bg: "#FDF5D9",
-    iconBg: "#F8C20A",
-    icon: <PixIcon />,
-  },
-  {
-    title: "Pending Acceptance",
-    value: "500",
-    bg: "#FFCCDB",
-    iconBg: "#FF6692",
-    icon: <HourglassBottomIcon />,
-    darkBtn: true,
-  },
-  {
-    title: "My Payment",
-    value: "15,000",
-    bg: "#DEFFEB",
-    iconBg: "#36C76C",
-    icon: <AccountBalanceWalletIcon />,
-  },
-  {
-    title: "Problematic Order",
-    value: "15,000",
-    bg: "#FFCFC2",
-    iconBg: "#FF7955",
-    icon: <ReportProblemOutlinedIcon />,
-  },
-];
+const DashboardStats = ({ statsData, loading }) => {
+  console.log("📊 STATS RECEIVED:", statsData);
 
-const DashboardStats = () => {
+  const stats = [
+    {
+      title: "Total Order",
+      value: statsData?.totalOrders ?? 0,
+      bg: "#DADAFF",
+      iconBg: "#635BFF",
+      icon: <CurrencyRupeeIcon />,
+    },
+    {
+      title: "Total GMV",
+      value: statsData?.totalGMV ?? 0,
+      bg: "#FDF5D9",
+      iconBg: "#F8C20A",
+      icon: <PixIcon />,
+    },
+    {
+      title: "Pending Acceptance",
+      value: statsData?.pendingAcceptance ?? 0,
+      bg: "#FFCCDB",
+      iconBg: "#FF6692",
+      icon: <HourglassBottomIcon />,
+    },
+    {
+      title: "My Payment",
+      value: statsData?.myPayment ?? 0,
+      bg: "#DEFFEB",
+      iconBg: "#36C76C",
+      icon: <AccountBalanceWalletIcon />,
+    },
+    {
+      title: "Problematic Order",
+      value: statsData?.problematicOrder ?? 0,
+      bg: "#FFCFC2",
+      iconBg: "#FF7955",
+      icon: <ReportProblemOutlinedIcon />,
+    },
+  ];
+
+  if (loading) return null;
+
   return (
     <Box
       sx={{
-        mt:2,
+        mt: 2,
         display: "flex",
         gap: 3,
         flexWrap: "wrap",
@@ -71,7 +74,6 @@ const DashboardStats = () => {
             textAlign: "center",
           }}
         >
-          {/* ICON */}
           <Box
             sx={{
               width: 48,
@@ -89,17 +91,14 @@ const DashboardStats = () => {
             {item.icon}
           </Box>
 
-          {/* TITLE */}
-          <Typography fontSize={16} color="#111" fontWeight={500}>
+          <Typography fontSize={16} fontWeight={500}>
             {item.title}
           </Typography>
 
-          {/* VALUE */}
           <Typography fontSize={20} fontWeight={700} mt={0.5}>
-            {item.value}
+            {item.value.toLocaleString()}
           </Typography>
 
-          {/* BUTTON */}
           <Button
             size="small"
             sx={{
@@ -109,11 +108,10 @@ const DashboardStats = () => {
               px: 3,
               py: 1,
               fontSize: 12,
-              bgcolor:  "#fff",
+              bgcolor: "#fff",
               color: "#111",
-              boxShadow: "none",
               "&:hover": {
-                bgcolor: "#000" ,
+                bgcolor: "#000",
                 color: "#fff",
               },
             }}

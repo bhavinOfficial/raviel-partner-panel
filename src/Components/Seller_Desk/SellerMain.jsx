@@ -17,7 +17,7 @@ const SellerMain = () => {
   const [seller, setSeller] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  console.log("seller", seller);
+  // console.log("seller", seller.id);
 
   useEffect(() => {
     const fetchSeller = async () => {
@@ -102,7 +102,7 @@ const SellerMain = () => {
         <SellerDeskPayoutHistory seller={seller} />
         <SellerDeskCodVsPrepaid seller={seller} />
       </Box>
-        <SellerAllOrderDetails/>
+        <SellerAllOrderDetails seller={seller.id} />
 
     </Container>
   );
