@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Typography,
@@ -10,178 +10,153 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Chip,
   IconButton,
   Container,
-} from "@mui/material"
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
-
-const rows = [
-  {
-    seller: "XZc058",
-    date: "12-12-2025",
-    order: "17655219643821301052J",
-    ship: "17655219643821301052J",
-    value: 850,
-    mail: "error",
-  },
-  {
-    seller: "XKHY08",
-    date: "12-12-2025",
-    order: "17655219643821301052J",
-    ship: "17655219643821301052J",
-    value: 850,
-    mail: "success",
-  },
-  {
-    seller: "KHU005",
-    date: "12-12-2025",
-    order: "17655219643821301052J",
-    ship: "17655219643821301052J",
-    value: 850,
-    mail: "error",
-  },
-]
+  CircularProgress,
+} from "@mui/material";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import axiosInstance from "../Form/axiosInstance";
 
 const CanceledbySeller = () => {
-  const [sellerSearch, setSellerSearch] = useState("")
-  const [shipmentSearch, setShipmentSearch] = useState("")
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [sellerSearch, setSellerSearch] = useState("");
 
-  const filteredRows = rows.filter((row) => {
-    const sellerMatch = row.seller
-      .toLowerCase()
-      .includes(sellerSearch.toLowerCase())
+  /* =========================
+     🔹 FETCH API DATA
+  ========================= */
+  const fetchCanceledBySellerOrders = async () => {
+    try {
+      setLoading(true);
 
-    const shipmentMatch = row.ship
-      .toLowerCase()
-      .includes(shipmentSearch.toLowerCase())
+      const res = await axiosInstance.get(
+        "/partner/cancelled-or-high-returned-by-sellers",
+        {
+          params: {
+            highReturnsSellers: false,
+            cancelledBySellers: true,
+          },
+        }
+      );
 
-    return sellerMatch && shipmentMatch
-  })
+      const mapped = (res.data?.payload || []).map((item, index) => ({
+        id: index + 1,
+        sellerId: item.sellerId || "-",
+        sellerName: item.sellerName || "-",
+        sellerEmailId: item.sellerEmail?.trim() || "-",
+        phoneNumber: item.phoneNumber?.trim() || "-",
+        productCategories:
+          Array.isArray(item.productCategories) &&
+          item.productCategories.length > 0
+            ? item.productCategories
+            : ["N/A"],
+      }));
+
+      setData(mapped);
+    } catch (error) {
+      console.error("❌ Cancelled-by-seller API error:", error);
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCanceledBySellerOrders();
+  }, []);
+
+  /* =========================
+     🔹 FILTER (FIXED)
+  ========================= */
+  const filteredRows = useMemo(() => {
+    return data.filter((row) =>
+      row.sellerId.toLowerCase().includes(sellerSearch.toLowerCase())
+    );
+  }, [data, sellerSearch]);
 
   return (
     <Container maxWidth={false} sx={{ maxWidth: "1400px", py: 4 }}>
       <Box sx={{ p: 3, minHeight: "100vh" }}>
-                  <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              mb: 3,
-              alignItems: "center",
-            }}
-          >
-            <Typography fontWeight={600}>
-              Canceled by Seller Order Details
-            </Typography>
+        {/* HEADER */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            mb: 3,
+            alignItems: "center",
+          }}
+        >
+          <Typography fontSize={30} fontWeight={600}>
+            Canceled by Seller Order Details
+          </Typography>
 
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
-                size="small"
-                placeholder="Search by Seller Id"
-                value={sellerSearch}
-                onChange={(e) => setSellerSearch(e.target.value)}
-              />
-              <TextField
-                size="small"
-                placeholder="Search by Shipment ID"
-                value={shipmentSearch}
-                onChange={(e) => setShipmentSearch(e.target.value)}
-              />
-            </Box>
-          </Box>
+          <TextField
+            size="small"
+            placeholder="Search by Seller Id"
+            value={sellerSearch}
+            onChange={(e) => setSellerSearch(e.target.value)}
+          />
+        </Box>
+
+        {/* TABLE */}
         <Paper
           elevation={0}
           sx={{
-            // p: 3,
             borderRadius: "20px 20px 0 0",
             boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
           }}
         >
-          {/* 🔹 Header */}
-
-
-          {/* 🔹 Table */}
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell
-                    sx={{
-                      bgcolor: "#dcdcff",
-                      borderTopLeftRadius: "12px",
-                      borderBottomLeftRadius: "none",
-                      borderBottomRightRadius: "none",
-                    }}
-                  />
+                  {/* <TableCell sx={{ bgcolor: "#dcdcff" }} /> */}
                   <TableCell sx={{ bgcolor: "#dcdcff" }}>
                     <b>Seller ID</b>
                   </TableCell>
                   <TableCell sx={{ bgcolor: "#dcdcff" }}>
-                    <b>Date</b>
+                    <b>Seller Name</b>
                   </TableCell>
                   <TableCell sx={{ bgcolor: "#dcdcff" }}>
-                    <b>Order ID</b>
+                    <b>Seller Email ID</b>
                   </TableCell>
                   <TableCell sx={{ bgcolor: "#dcdcff" }}>
-                    <b>Shipment ID</b>
+                    <b>Phone Number</b>
                   </TableCell>
                   <TableCell sx={{ bgcolor: "#dcdcff" }}>
-                    <b>Value</b>
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      bgcolor: "#dcdcff",
-                      borderTopRightRadius: "12px",
-                      borderBottomRightRadius: "12px",
-                    }}
-                  >
-                    <b>Action</b>
+                    <b>Product Categories</b>
                   </TableCell>
                 </TableRow>
               </TableHead>
 
               <TableBody>
-                {filteredRows.length === 0 ? (
+                {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} align="center">
+                    <TableCell colSpan={6} align="center" sx={{ py: 5 }}>
+                      <CircularProgress />
+                    </TableCell>
+                  </TableRow>
+                ) : filteredRows.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
                       No records found
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredRows.map((row, index) => (
-                    <TableRow key={index} hover>
-                      <TableCell width={40}>
+                  filteredRows.map((row) => (
+                    <TableRow key={row.id} hover>
+                      {/* <TableCell width={40}>
                         <IconButton size="small">
                           <KeyboardArrowDownIcon />
                         </IconButton>
-                      </TableCell>
+                      </TableCell> */}
 
-                      <TableCell>{row.seller}</TableCell>
-                      <TableCell>{row.date}</TableCell>
-                      <TableCell>{row.order}</TableCell>
-                      <TableCell
-                        sx={{
-                          color: "blue",
-                          textDecoration: "underline",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {row.ship}
-                      </TableCell>
-                      <TableCell>{row.value}</TableCell>
+                      <TableCell>{row.sellerId}</TableCell>
+                      <TableCell>{row.sellerName}</TableCell>
+                      <TableCell>{row.sellerEmailId}</TableCell>
+                      <TableCell>{row.phoneNumber}</TableCell>
                       <TableCell>
-                        <Chip
-                          label="Mail"
-                          sx={{
-                            bgcolor:
-                              row.mail === "success"
-                                ? "#3cff9a"
-                                : "#ff6b8a",
-                            color: "#000",
-                            fontWeight: 500,
-                            cursor: "pointer",
-                          }}
-                        />
+                        {row.productCategories.join(", ")}
                       </TableCell>
                     </TableRow>
                   ))
@@ -192,7 +167,7 @@ const CanceledbySeller = () => {
         </Paper>
       </Box>
     </Container>
-  )
-}
+  );
+};
 
-export default CanceledbySeller
+export default CanceledbySeller;
