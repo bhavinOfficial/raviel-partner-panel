@@ -14,7 +14,7 @@ const Home = () => {
 
   const fetchLoggedInUser = async () => {
     try {
-      console.log("➡️ Calling /user API...");
+      // console.log("➡️ Calling /user API...");
       setLoading(true);
 
       const res = await axiosInstance.get("/user");

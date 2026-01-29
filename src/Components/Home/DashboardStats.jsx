@@ -20,7 +20,7 @@ const DashboardStats = ({ statsData, loading }) => {
     {
       title: "Total GMV",
       value: statsData?.totalGMV ?? 0,
-      bg: "#FDF5D9",
+      bg: "#FDF5D9",  
       iconBg: "#F8C20A",
       icon: <PixIcon />,
     },

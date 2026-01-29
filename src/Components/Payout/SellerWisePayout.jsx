@@ -2,28 +2,28 @@ import { Box, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../Form/axiosInstance";
 
-const SellerWisePayout = ({ refreshKey }) => {
+const SellerWisePayout = ({ payoutRefreshSignal }) => {
   const [totalFixed, setTotalFixed] = useState(0);
   const [totalNMV, setTotalNMV] = useState(0);
   const [finalPayout, setFinalPayout] = useState(0);
 
-  useEffect(() => {
-    const fetchPayoutSummary = async () => {
-      try {
-        const res = await axiosInstance.get("/user");
+useEffect(() => {
+  const fetchPayoutSummary = async () => {
+    try {
+      const res = await axiosInstance.get("/user");
+      const payload = res.data?.payload;
 
-        const payload = res.data?.payload;
+      setTotalFixed(payload?.totalFixedPayment ?? 0);
+      setTotalNMV(payload?.totalNMVPayment ?? 0);
+      setFinalPayout(payload?.finalPayout ?? 0);
+    } catch (error) {
+      console.error("Failed to fetch payout summary", error);
+    }
+  };
 
-        setTotalFixed(payload?.totalFixedPayment ?? 0);
-        setTotalNMV(payload?.totalNMVPayment ?? 0);
-        setFinalPayout(payload?.finalPayout ?? 0);
-      } catch (error) {
-        console.error("Failed to fetch payout summary", error);
-      }
-    };
-
-    fetchPayoutSummary();
-  }, [refreshKey]); // 🔥 KEY POINT
+  fetchPayoutSummary();
+}, [payoutRefreshSignal]); // ✅ semantic signal
+// 🔥 KEY POINT
 
   return (
     <Box sx={{ marginBottom: "20px" }}>

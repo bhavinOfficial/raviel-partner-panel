@@ -22,6 +22,8 @@ const Payout = () => {
   const [sellerId, setSellerId] = useState("");
   const [sellerName, setSellerName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [payoutRefreshSignal, setPayoutRefreshSignal] = useState(0);
+
 
   /* 🔹 COMMON FETCH FUNCTION */
   const fetchSellers = async () => {
@@ -32,7 +34,7 @@ const Payout = () => {
 
       const mapped = (res.data?.payload || []).map((item) => ({
         month: formatMonth(item.launchingDate),
-        sellerId: item.sellerId,
+        sellerId: item.id,
         sellerName: item.sellerName,
 
         fixed: item.fixedPaymentAmount ?? 0,
@@ -69,26 +71,31 @@ const Payout = () => {
   };
 
   /* 🔹 Toggle Handler (API update + RE-FETCH) */
-  const handleToggleReceived = async (sellerId, value, paymentType) => {
-    try {
-      await axiosInstance.put(
-        `/partner/confirm-seller-payment/${id}`,
-        {
-          isPaymentReceivedOrNot: value,
-          paymentType,
-        }
-      );
+const handleToggleReceived = async (id, value, paymentType) => {
+  try {
+    await axiosInstance.put(
+      `/partner/confirm-seller-payment/${id}`,
+      {
+        isPaymentReceivedOrNot: value,
+        paymentType,
+      }
+    );
 
-      // 🔥 MAIN CHANGE: API RE-CALL
-      await fetchSellers();
-    } catch (err) {
-      console.error("Toggle error:", err);
-    }
-  };
+    // 🔁 Refresh sellers table
+    await fetchSellers();
+
+    // 🔥 Trigger payout summary refresh
+    setPayoutRefreshSignal((prev) => prev + 1);
+  } catch (err) {
+    console.error("Toggle error:", err);
+  }
+};
+
 
   return (
     <Container maxWidth={false} sx={{ maxWidth: "1400px" }}>
-      <SellerWisePayout />
+      <SellerWisePayout payoutRefreshSignal={payoutRefreshSignal} />
+
 
       <SearchFilters
         month={month}
@@ -100,17 +107,18 @@ const Payout = () => {
         onApply={handleApply}
       />
 
-      <SellerWisePayoutSummary
-        rows={filteredRows}
-        loading={loading}
-        onToggle={handleToggleReceived}
-      />
+<SellerWisePayoutSummary
+  rows={filteredRows}
+  loading={loading}
+  onToggle={handleToggleReceived}
+/>
 
-      <SellerWisePayout2Table
-        rows={filteredRows}
-        loading={loading}
-        onToggle={handleToggleReceived}
-      />
+<SellerWisePayout2Table
+  rows={filteredRows}
+  loading={loading}
+  onToggle={handleToggleReceived}
+/>
+
     </Container>
   );
 };
